@@ -1,11 +1,17 @@
 {
-  "name": "my-ytdl-vercel",
-  "version": "1.0.0",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "dependencies": {
-    "play-dl": "^1.9.7"
-  }
+  "builds": [
+    {
+      "src": "function.js",
+      "use": "@vercel/node",
+      "config": {
+        "includeFiles": ["yt-dlp"]
+      }
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "/function.js"
+    }
+  ]
 }
