@@ -1,11 +1,11 @@
 {
-  "name": "my-ytdlp-vercel",
+  "name": "my-ytdl-vercel",
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
-    "yt-dlp": "^1.5.1"
+    "ytdl-core": "^4.11.5"
   }
 }
