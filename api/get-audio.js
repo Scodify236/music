@@ -1,4 +1,4 @@
-const youtubedl = require('youtube-dl-exec');
+const ytdlp = require('yt-dlp-exec');
 
 const handler = async (req, res) => {
     const { url } = req.query;
@@ -7,8 +7,8 @@ const handler = async (req, res) => {
     }
 
     try {
-        // Fetch audio stream URL using yt-dlp wrapper
-        const output = await youtubedl(url, {
+        // Fetch audio stream URL using yt-dlp
+        const output = await ytdlp(url, {
             dumpSingleJson: true,
             format: 'bestaudio'
         });
