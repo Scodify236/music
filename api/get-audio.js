@@ -1,6 +1,6 @@
 const youtubedl = require('youtube-dl-exec');
 
-module.exports.handler = async (event) => {
+const handler = async (event) => {
     const videoUrl = event.queryStringParameters.url;
     if (!videoUrl) {
         return {
@@ -28,3 +28,5 @@ module.exports.handler = async (event) => {
         };
     }
 };
+
+export default handler;
