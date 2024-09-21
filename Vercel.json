@@ -1,0 +1,17 @@
+{
+  "builds": [
+    {
+      "src": "api/get-audio.js",
+      "use": "@vercel/node",
+      "config": {
+        "includeFiles": ["yt-dlp"]
+      }
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/get-audio",
+      "dest": "/api/get-audio.js"
+    }
+  ]
+}
