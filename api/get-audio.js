@@ -1,4 +1,4 @@
-const ytdlp = require('yt-dlp');
+const ytdl = require('ytdl-core');
 
 const handler = async (req, res) => {
     const { url } = req.query;
@@ -7,14 +7,17 @@ const handler = async (req, res) => {
     }
 
     try {
-        // Fetch audio stream URL using yt-dlp
-        const info = await ytdlp(url, {
-            dumpSingleJson: true,
-            format: 'bestaudio'
-        });
+        // Get info from YouTube
+        const info = await ytdl.getInfo(url);
+        
+        // Find the audio format with the highest quality
+        const audioFormat = ytdl.chooseFormat(info.formats, { quality: 'highestaudio' });
 
-        const audioUrl = info.url;
-        return res.status(200).json({ audioUrl });
+        if (!audioFormat) {
+            return res.status(404).json({ error: 'No audio format found' });
+        }
+
+        return res.status(200).json({ audioUrl: audioFormat.url });
     } catch (error) {
         return res.status(500).json({ error: error.message });
     }
