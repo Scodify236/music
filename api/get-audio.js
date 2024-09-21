@@ -1,8 +1,7 @@
 const youtubedl = require('youtube-dl-exec');
 
-exports.handler = async (event) => {
+module.exports.handler = async (event) => {
     const videoUrl = event.queryStringParameters.url;
-
     if (!videoUrl) {
         return {
             statusCode: 400,
@@ -16,8 +15,8 @@ exports.handler = async (event) => {
             format: 'bestaudio',
             getUrl: true
         });
-
         const audioUrl = output.trim();
+
         return {
             statusCode: 200,
             body: JSON.stringify({ audioUrl }),
