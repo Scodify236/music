@@ -1,7 +1,4 @@
-const { exec } = require('child_process');
-const { promisify } = require('util');
-
-const execPromise = promisify(exec);
+const youtubedl = require('youtube-dl-exec');
 
 exports.handler = async (event) => {
     const videoUrl = event.queryStringParameters.url;
@@ -14,15 +11,13 @@ exports.handler = async (event) => {
     }
 
     try {
-        const { stdout, stderr } = await execPromise(`yt-dlp -f bestaudio --get-url ${videoUrl}`);
-        if (stderr) {
-            return {
-                statusCode: 500,
-                body: JSON.stringify({ error: stderr }),
-            };
-        }
+        // Fetch audio stream URL using yt-dlp wrapper
+        const output = await youtubedl(videoUrl, {
+            format: 'bestaudio',
+            getUrl: true
+        });
 
-        const audioUrl = stdout.trim();
+        const audioUrl = output.trim();
         return {
             statusCode: 200,
             body: JSON.stringify({ audioUrl }),
