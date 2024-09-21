@@ -2,7 +2,6 @@
   "name": "youtube-audio-stream-function",
   "version": "1.0.0",
   "description": "Vercel serverless function to get YouTube audio stream URL",
-  "main": "functions/get-audio.js",
   "scripts": {
     "start": "vercel dev"
   },
