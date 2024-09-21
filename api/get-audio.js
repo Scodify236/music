@@ -1,4 +1,4 @@
-const ytdlp = require('yt-dlp-exec');
+const ytdlp = require('yt-dlp');
 
 const handler = async (req, res) => {
     const { url } = req.query;
@@ -8,12 +8,12 @@ const handler = async (req, res) => {
 
     try {
         // Fetch audio stream URL using yt-dlp
-        const output = await ytdlp(url, {
+        const info = await ytdlp(url, {
             dumpSingleJson: true,
             format: 'bestaudio'
         });
 
-        const audioUrl = output.url;
+        const audioUrl = info.url;
         return res.status(200).json({ audioUrl });
     } catch (error) {
         return res.status(500).json({ error: error.message });
