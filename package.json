@@ -1,11 +1,11 @@
 {
-  "name": "my-ytdl-vercel",
+  "name": "my-ytdlp-vercel",
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
-    "youtube-dl-exec": "^2.1.2"
+    "yt-dlp-exec": "^1.1.0"
   }
 }
