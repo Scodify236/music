@@ -1,32 +1,23 @@
 const youtubedl = require('youtube-dl-exec');
 
-const handler = async (event) => {
-    const videoUrl = event.queryStringParameters.url;
-    if (!videoUrl) {
-        return {
-            statusCode: 400,
-            body: JSON.stringify({ error: 'No URL provided' }),
-        };
+const handler = async (req, res) => {
+    const { url } = req.query;
+    if (!url) {
+        return res.status(400).json({ error: 'No URL provided' });
     }
 
     try {
         // Fetch audio stream URL using yt-dlp wrapper
-        const output = await youtubedl(videoUrl, {
-            format: 'bestaudio',
-            getUrl: true
+        const output = await youtubedl(url, {
+            dumpSingleJson: true,
+            format: 'bestaudio'
         });
-        const audioUrl = output.trim();
 
-        return {
-            statusCode: 200,
-            body: JSON.stringify({ audioUrl }),
-        };
+        const audioUrl = output.url;
+        return res.status(200).json({ audioUrl });
     } catch (error) {
-        return {
-            statusCode: 500,
-            body: JSON.stringify({ error: error.message }),
-        };
+        return res.status(500).json({ error: error.message });
     }
 };
 
-export default handler;
+module.exports = handler;
