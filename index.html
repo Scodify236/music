@@ -125,7 +125,7 @@
                 }, 9000);
 
                 fetch(
-                    `https://api.allorigins.win/raw?url=https://ytdlp.online/stream?command=https://www.youtube.com/watch?v=${videoId} --get-url`,
+                    `https://ytdlp.online/stream?command=https://www.youtube.com/watch?v=${videoId} --get-url`,
                     { signal: controller.signal }
                 )
                 .then(response => {
