@@ -11,35 +11,72 @@
             theme: {
                 extend: {
                     colors: {
-                        primary: {"50":"#eff6ff","100":"#dbeafe","200":"#bfdbfe","300":"#93c5fd","400":"#60a5fa","500":"#3b82f6","600":"#2563eb","700":"#1d4ed8","800":"#1e40af","900":"#1e3a8a","950":"#172554"}
+                        primary: {"50":"#f0fdf4","100":"#dcfce7","200":"#bbf7d0","300":"#86efac","400":"#4ade80","500":"#22c55e","600":"#16a34a","700":"#15803d","800":"#166534","900":"#14532d","950":"#052e16"},
+                        youtube: {
+                            red: "#FF0000",
+                            darkRed: "#CC0000",
+                            lightGray: "#F1F1F1",
+                            darkGray: "#282828",
+                            black: "#0F0F0F"
+                        }
                     }
                 }
             }
         }
     </script>
+    <style>
+        /* Custom scrollbar styles */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+    </style>
 </head>
-<body class="bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200 transition-colors duration-300">
-    <div class="container mx-auto px-4 py-8 mb-20">
-        <div class="flex flex-col sm:flex-row justify-between items-center mb-8">
-            <h1 class="text-2xl sm:text-3xl font-bold mb-4 sm:mb-0">S-CLOUD made by Shashwat</h1>
-            <button id="darkModeToggle" class="p-2 rounded-full bg-gray-200 dark:bg-gray-700">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+<body class="bg-white dark:bg-youtube-black text-gray-900 dark:text-gray-100 transition-colors duration-300">
+    <header class="sticky top-0 z-50 bg-white dark:bg-youtube-black shadow-md">
+        <div class="container mx-auto px-4 py-3 flex items-center justify-between">
+            <div class="flex items-center">
+                <h1 class="text-xl sm:text-2xl font-bold mr-4">S-CLOUD</h1>
+                <span class="text-sm text-gray-500 dark:text-gray-400">Made with ❤️ made by Shashwat</span>
+            </div>
+            <button id="darkModeToggle" class="p-2 rounded-full bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors duration-300">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
                 </svg>
             </button>
         </div>
+    </header>
+
+    <main class="container mx-auto px-4 py-8 mb-24">
         <form id="searchForm" class="mb-8">
             <div class="flex flex-col sm:flex-row">
-                <input type="text" id="searchInput" placeholder="Enter search query" class="w-full sm:w-auto flex-grow p-3 rounded-t-lg sm:rounded-l-lg sm:rounded-t-none border-2 border-primary-300 dark:border-primary-700 bg-white dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-primary-400 dark:focus:ring-primary-600 mb-2 sm:mb-0">
-                <button type="submit" id="searchButton" class="w-full sm:w-auto px-6 py-3 rounded-b-lg sm:rounded-r-lg sm:rounded-b-none bg-primary-500 text-white hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-primary-400 focus:ring-opacity-50 transition-colors duration-300">Search</button>
+                <input type="text" id="searchInput" placeholder="Search for music..." class="w-full sm:w-auto flex-grow p-3 rounded-l-full border-2 border-r-0 border-gray-300 dark:border-gray-700 bg-white dark:bg-youtube-darkGray focus:outline-none focus:ring-2 focus:ring-youtube-red dark:focus:ring-youtube-darkRed mb-2 sm:mb-0">
+                <button type="submit" id="searchButton" class="w-full sm:w-auto px-6 py-3 rounded-r-full bg-youtube-red hover:bg-youtube-darkRed text-white focus:outline-none focus:ring-2 focus:ring-youtube-darkRed focus:ring-opacity-50 transition-colors duration-300">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline-block" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                    <span class="ml-2 hidden sm:inline">Search</span>
+                </button>
             </div>
         </form>
-        <div id="results" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mb-8"></div>
-    </div>
-    <div class="fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-800 shadow-lg p-4 transition-all duration-300">
-        <audio id="audioPlayer" controls class="w-full mb-2"></audio>
-        <div id="nowPlaying" class="text-center font-semibold"></div>
-    </div>
+        <div id="results" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-8"></div>
+    </main>
+
+    <footer class="fixed bottom-0 left-0 right-0 bg-white dark:bg-youtube-darkGray shadow-lg transition-all duration-300">
+        <div class="container mx-auto px-4 py-3">
+            <audio id="audioPlayer" controls class="w-full mb-2"></audio>
+            <div id="nowPlaying" class="text-center font-semibold text-sm"></div>
+        </div>
+    </footer>
 
     <script>
         const searchForm = document.getElementById('searchForm');
@@ -47,6 +84,27 @@
         const resultsContainer = document.getElementById('results');
         const audioPlayer = document.getElementById('audioPlayer');
         const nowPlaying = document.getElementById('nowPlaying');
+
+        // List of Piped API instances
+        const pipedInstances = [
+            'https://pipedapi.kavin.rocks',
+            'https://pipedapi.moomoo.me',
+            'https://pipedapi.syncpundit.io',
+            'https://pipedapi.adminforge.de',
+            'https://pipedapi.qdi.fi',
+            'https://pipedapi.aeong.one',
+            'https://pipedapi.leptons.xyz',
+            'https://pipedapi.shimul.me',
+            'https://piped-api.garudalinux.org',
+            'https://pipedapi.rivo.lol',
+            'https://pipedapi.esmailelbob.xyz',
+            'https://api.piped.projectsegfau.lt',
+            'https://pipedapi.in.projectsegfau.lt',
+            'https://pipedapi.us.projectsegfau.lt',
+            'https://piped-api.privacy.com.de',
+            'https://pipedapi.smnz.de',
+            'https://pipedapi.delatarix.site'
+        ];
 
         function addCacheBuster(url) {
             const cacheBuster = `cache_buster=${Date.now()}`;
@@ -78,9 +136,9 @@
             items.forEach(item => {
                 if (item.type === 'stream') {
                     const videoElement = document.createElement('div');
-                    videoElement.className = 'bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden transition-transform duration-300 hover:scale-105 cursor-pointer';
+                    videoElement.className = 'bg-white dark:bg-youtube-darkGray rounded-lg shadow-md overflow-hidden transition-transform duration-300 hover:scale-105 cursor-pointer';
                     videoElement.innerHTML = `
-                        <img src="${addCacheBuster(item.thumbnail)}" alt="${item.title}" class="w-full h-40 object-cover">
+                        <img src="${item.thumbnail}" alt="${item.title}" class="w-full h-40 object-cover">
                         <div class="p-4">
                             <h3 class="text-lg font-semibold mb-2 truncate">${item.title}</h3>
                             <p class="text-sm text-gray-600 dark:text-gray-400 mb-1">${item.uploaderName}</p>
@@ -122,19 +180,21 @@
         async function fetchAudioUrlWithRetry(videoId, retries = 3) {
             for (let i = 0; i < retries; i++) {
                 try {
-                    // First, try using Piped API
-                    const pipedUrl = await fetchPipedApiUrl(videoId);
-                    if (pipedUrl) {
-                        return pipedUrl;
+                    // Try all Piped instances
+                    for (const instance of pipedInstances) {
+                        const pipedUrl = await fetchPipedApiUrl(videoId, instance);
+                        if (pipedUrl) {
+                            return pipedUrl;
+                        }
                     }
                     
-                    // If Piped API fails, fall back to ytdlonline
+                    // If all Piped instances fail, fall back to ytdlonline
                     const ytdlUrl = await fetchYtdlOnlineUrl(videoId);
                     if (ytdlUrl) {
                         return ytdlUrl;
                     }
                     
-                    throw new Error('Both APIs failed to provide a valid audio URL');
+                    throw new Error('All APIs failed to provide a valid audio URL');
                 } catch (error) {
                     console.error(`Attempt ${i + 1} failed:`, error);
                     if (i === retries - 1) throw error;
@@ -143,33 +203,33 @@
             }
         }
 
-        async function fetchPipedApiUrl(videoId) {
+        async function fetchPipedApiUrl(videoId, instance) {
             try {
-                const response = await fetch(addCacheBuster(`https://pipedapi.reallyaweso.me/streams/${videoId}`), {
+                const response = await fetch(addCacheBuster(`${encodeURIComponent(`${instance}/streams/${videoId}`)}`), {
                     cache: 'no-store'
                 });
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
                 const data = await response.json();
-                console.log('Piped API response:', data); // Log the entire response for debugging
+                console.log(`${instance} response:`, data);
                 const audioStream = data.audioStreams.find(stream => stream.mimeType.startsWith('audio/'));
                 if (audioStream) {
-                    console.log('Selected audio stream:', audioStream); // Log the selected audio stream
+                    console.log('Selected audio stream:', audioStream);
                     return audioStream.url;
                 } else {
-                    console.warn('No suitable audio stream found in Piped API response');
+                    console.warn(`No suitable audio stream found in ${instance} response`);
                     return null;
                 }
             } catch (error) {
-                console.error('Error fetching from Piped API:', error);
+                console.error(`Error fetching from ${instance}:`, error);
                 return null;
             }
         }
 
         async function fetchYtdlOnlineUrl(videoId) {
             try {
-                const response = await fetch(addCacheBuster(`https://api.allorigins.win/raw?url=https://ytdlp.online/stream?command=https://www.youtube.com/watch?v=${videoId} --get-url`), {
+                const response = await fetch(addCacheBuster(`https://api.allorigins.win/raw?url=${encodeURIComponent(`https://ytdlp.online/stream?command=https://www.youtube.com/watch?v=${videoId} --get-url`)}`), {
                     timeout: 10000,
                     cache: 'no-store'
                 });
@@ -177,7 +237,7 @@
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
                 const responseText = await response.text();
-                console.log('ytdlonline response:', responseText); // Log the entire response for debugging
+                console.log('ytdlonline response:', responseText);
                 const urls = responseText.split('\n')
                     .filter(line => line.trim().startsWith('data:'))
                     .map(line => line.substring(5).trim())
@@ -197,12 +257,12 @@
         }
 
         audioPlayer.addEventListener('error', (e) => {
-            console.error('Try other:', e);
-            nowPlaying.textContent = 'FALIED! try another or. Click to retry.';
+            console.error('Audio player error:', e);
+            nowPlaying.textContent = 'FAILED! Try another or click to retry.';
             nowPlaying.onclick = () => {
                 audioPlayer.load();
                 audioPlayer.play().catch(playError => {
-                    console.error('Try other:', playError);
+                    console.error('Retry play error:', playError);
                     nowPlaying.textContent = 'Error: Could not play audio. Please try another track.';
                 });
             };
@@ -216,7 +276,6 @@
         function isAudioPlaying() {
             return !audioPlayer.paused && !audioPlayer.ended && audioPlayer.currentTime > 0;
         }
-
     </script>
 </body>
 </html>
