@@ -126,307 +126,199 @@
     </footer>
 
     <script>
-        const searchForm = document.getElementById('searchForm');
-        const searchInput = document.getElementById('searchInput');
-        const resultsContainer = document.getElementById('results');
-        const audioPlayer = document.getElementById('audioPlayer');
-        const nowPlaying = document.getElementById('nowPlaying');
-        const resultsTitle = document.getElementById('resultsTitle');
-        const clearSearchButton = document.getElementById('clearSearch');
+const searchForm = document.getElementById('searchForm');
+const searchInput = document.getElementById('searchInput');
+const resultsContainer = document.getElementById('results');
+const audioPlayer = document.getElementById('audioPlayer');
+const nowPlaying = document.getElementById('nowPlaying');
+const resultsTitle = document.getElementById('resultsTitle');
+const clearSearchButton = document.getElementById('clearSearch');
 
-        function addCacheBuster(url) {
-            const cacheBuster = `cache_buster=${Date.now()}`;
-            return url.includes('?') ? `${url}&${cacheBuster}` : `${url}?${cacheBuster}`;
-        }
+function addCacheBuster(url) {
+    const cacheBuster = `cache_buster=${Date.now()}`;
+    return url.includes('?') ? `${url}&${cacheBuster}` : `${url}?${cacheBuster}`;
+}
 
-        async function fetchTrendingVideos() {
-            try {
-                const response = await fetch(addCacheBuster('https://pipedapi.kavin.rocks/trending?region=IN'), {
-                    cache: 'no-store'
-                });
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                const data = await response.json();
-                displayResults(data);
-            } catch (error) {
-                console.error('Error fetching trending videos:', error);
-                resultsContainer.innerHTML = '<p class="text-center text-red-500">An error occurred while fetching trending videos. Please try again.</p>';
-            }
-        }
-
-        searchForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const query = searchInput.value;
-            if (query.trim() === '') return;
-
-            try {
-                const response = await fetch(addCacheBuster(`https://pipedapi.kavin.rocks/search?q=${encodeURIComponent(query)}&filter=all`), {
-                    cache: 'no-store'
-                });
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                const data = await response.json();
-                resultsTitle.textContent = `Search Results for "${query}"`;
-                displayResults(data.items);
-            } catch (error) {
-                console.error('Error fetching search results:', error);
-                resultsContainer.innerHTML = '<p class="text-center text-red-500">An error occurred while fetching results. Please try again.</p>';
-            }
-        });
-
-        clearSearchButton.addEventListener('click', () => {
-            searchInput.value = '';
-            resultsTitle.textContent = 'Trending in India';
-            fetchTrendingVideos();
-        });
-
-        function displayResults(items) {
-            resultsContainer.innerHTML = '';
-            items.forEach(item => {
-                if (item.type === 'stream' || item.type === 'video') {
-                    const videoElement = document.createElement('div');
-                    videoElement.className = 'bg-white dark:bg-youtube-darkGray rounded-lg shadow-md overflow-hidden transition-transform duration-300 hover:scale-105 cursor-pointer';
-                    videoElement.innerHTML = `
-                        <img src="${item.thumbnail}" alt="${item.title}" class="w-full h-40 object-cover">
-                        <div class="p-4">
-                            <h3 class="text-lg font-semibold mb-2 truncate">${item.title}</h3>
-                            <p class="text-sm text-gray-600 dark:text-gray-400 mb-1">${item.uploaderName}</p>
-                            <p class="text-xs text-gray-500 dark:text-gray-500">${item.views} views • ${item.uploadedDate || item.uploaded}</p>
-                        </div>
-                    `;
-                    videoElement.addEventListener('click', () => playAudio(item.url, item.title));
-                    resultsContainer.appendChild(videoElement);
-                }
-            });
-        }
-
-        async function playAudio(videoUrl, title) {
-            const videoId = videoUrl.split('v=')[1];
-            nowPlaying.textContent = `Loading audio for: ${title}`;
-            
-            try {
-                const audioUrl = await fetchAudioUrlWithRetry(videoId);
-                
-                if (audioUrl) {
-                    audioPlayer.src = addCacheBuster(audioUrl);
-                    try {
-                        await audioPlayer.play();
-                        nowPlaying.textContent = `Now playing: ${title}`;
-                    } catch (playError) {
-                        console.error('Error playing audio:', playError);
-                        throw new Error('Failed to play audio');
-                    }
-                } else {
-                    throw new Error('Audio URL not found in the response');
-                }
-            } catch (error) {
-                console.error('Error fetching or playing audio stream:', error);
-                nowPlaying.textContent = 'Error: Could not play audio. Click to retry.';
-                nowPlaying.onclick = () => playAudio(videoUrl, title);
-            }
-        }
-
-        async function fetchAudioUrlWithRetry(videoId, retries = 3) {
-            for (let i = 0; i < retries; i++) {
-                try {
-                    // First, try using Piped API
-                    const pipedUrl = await fetchPipedApiUrl(videoId);
-                    if (pipedUrl) {
-                        return pipedUrl;
-                    }
-                    
-                    // If the first Piped API fails, try the second Piped API
-                    const secondPipedUrl = await fetchSecondPipedApiUrl(videoId);
-                    if (secondPipedUrl) {
-                        return secondPipedUrl;
-                    }
-                    
-                    // If both Piped APIs fail, try the new API
-                    const newApiUrl = await fetchNewApiUrl(videoId);
-                    if (newApiUrl) {
-                        return newApiUrl;
-                    }
-                    
-                    // If the new API fails, try the Cobalt API
-                    const cobaltUrl = await fetchCobaltApiUrl(videoId);
-                    if (cobaltUrl) {
-                        return cobaltUrl;
-                    }
-                    
-                    // If all APIs fail, fall back to ytdlonline
-                    const ytdlUrl = await fetchYtdlOnlineUrl(videoId);
-                    if (ytdlUrl) {
-                        return ytdlUrl;
-                    }
-                    
-                    throw new Error('All APIs failed to provide a valid audio URL');
-                } catch (error) {
-                    console.error(`Attempt ${i + 1} failed:`, error);
-                    if (i === retries - 1) throw error;
-                    await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1))); // Exponential backoff
-                }
-            }
-        }
-
-        async function fetchPipedApiUrl(videoId) {
-            try {
-                const response = await fetch(addCacheBuster(`https://api.allorigins.win/raw?url=https://pipedapi.reallyaweso.me/streams/${videoId}`), {
-                    cache: 'no-store'
-                });
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                const data = await response.json();
-                console.log('Piped API response:', data);
-                const audioStream = data.audioStreams.find(stream => stream.mimeType.startsWith('audio/'));
-                if (audioStream) {
-                    console.log('Selected audio stream:', audioStream);
-                    return audioStream.url;
-                } else {
-                    console.warn('No suitable audio stream found in Piped API response');
-                    return null;
-                }
-            } catch (error) {
-                console.error('Error fetching from Piped API:', error);
-                return null;
-            }
-        }
-
-        async function fetchSecondPipedApiUrl(videoId) {
+async function fetchTrendingVideos() {
     try {
-        const response = await fetch(addCacheBuster(`https://api.allorigins.win/raw?url=https://pipedapi.adminforge.de/streams/${videoId}`), {
+        const response = await fetch(addCacheBuster('https://pipedapi.kavin.rocks/trending?region=IN'), {
             cache: 'no-store'
         });
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
         const data = await response.json();
-        console.log('Second Piped API response:', data);
-        const audioStream = data.audioStreams.find(stream => stream.mimeType.startsWith('audio/'));
-        if (audioStream) {
-            console.log('Selected audio stream from second Piped API:', audioStream);
-            return audioStream.url;
-        } else {
-            console.warn('No suitable audio stream found in second Piped API response');
-            return null;
-        }
+        displayResults(data);
     } catch (error) {
-        console.error('Error fetching from second Piped API:', error);
-        return null;
+        console.error('Error fetching trending videos:', error);
+        resultsContainer.innerHTML = '<p class="text-center text-red-500">An error occurred while fetching trending videos. Please try again.</p>';
     }
 }
 
-        async function fetchNewApiUrl(videoId) {
-            try {
-                const response = await fetch(addCacheBuster(`https://api.allorigins.win/raw?url=https://kityune.imput.net/api/json?id=${videoId}`), {
-                    cache: 'no-store'
-                });
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                const data = await response.json();
-                console.log('New API response:', data);
-                if (data.status === 'stream' && data.url) {
-                    console.log('Selected audio stream from new API:', data.url);
-                    return data.url;
-                } else {
-                    console.warn('No suitable audio stream found in new API response');
-                    return null;
-                }
-            } catch (error) {
-                console.error('Error fetching from new API:', error);
-                return null;
-            }
-        }
+searchForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const query = searchInput.value.trim();
+    if (query === '') return;
 
-        async function fetchCobaltApiUrl(videoId) {
-            try {
-                const response = await fetch('https://api.cobalt.tools/api/json', {
-                    method: 'POST',
-                    headers: {
-                        'Accept': 'application/json',
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        url: `https://www.youtube.com/watch?v=${videoId}`,
-                        aFormat: "opus",  // Ensure audio is in opus format for streaming
-                        isAudioOnly: true,
-                        audioBitrate: 96000 
-                    }),
-                });
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                const data = await response.json();
-                console.log('Cobalt API response:', data);
-                const audioUrl = data.audio || data.url;
-                if (audioUrl) {
-                    console.log('Selected audio stream from Cobalt API:', audioUrl);
-                    return audioUrl;
-                } else {
-                    console.warn('No suitable audio stream found in Cobalt API response');
-                    return null;
-                }
-            } catch (error) {
-                console.error('Error fetching from Cobalt API:', error);
-                return null;
-            }
-        }
-
-        async function fetchYtdlOnlineUrl(videoId) {
-            try {
-                const response = await fetch(addCacheBuster(`https://api.allorigins.win/raw?url=https://ytdlp.online/stream?command=https://www.youtube.com/watch?v=${videoId} --get-url`), {
-                    timeout: 10000,
-                    cache: 'no-store'
-                });
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                const responseText = await response.text();
-                console.log('ytdlonline response:', responseText);
-                const urls = responseText.split('\n')
-                    .filter(line => line.trim().startsWith('data:'))
-                    .map(line => line.substring(5).trim())
-                    .filter(url => url.startsWith('http'));
-                
-                if (urls.length >= 2) {
-                    return urls[1]; // Use the second URL
-                } else if (urls.length === 1) {
-                    return urls[0]; // Use the first URL if only one is available
-                }
-                console.warn('No suitable URL found in ytdlonline response');
-                return null;
-            } catch (error) {
-                console.error('Error fetching from ytdlonline:', error);
-                return null;
-            }
-        }
-
-        audioPlayer.addEventListener('error', (e) => {
-            console.error('Try other:', e);
-            nowPlaying.textContent = 'FAILED! Try another or click to retry.';
-            nowPlaying.onclick = () => {
-                audioPlayer.load();
-                audioPlayer.play().catch(playError => {
-                    console.error('Try other:', playError);
-                    nowPlaying.textContent = 'Error: Could not play audio. Please try another track.';
-                });
-            };
+    try {
+        const response = await fetch(addCacheBuster(`https://pipedapi.kavin.rocks/search?q=${encodeURIComponent(query)}&filter=all`), {
+            cache: 'no-store'
         });
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+        const data = await response.json();
+        resultsTitle.textContent = `Search Results for "${query}"`;
+        displayResults(data.items);
+    } catch (error) {
+        console.error('Error fetching search results:', error);
+        resultsContainer.innerHTML = '<p class="text-center text-red-500">An error occurred while fetching results. Please try again.</p>';
+    }
+});
 
-        const darkModeToggle = document.getElementById('darkModeToggle');
-        darkModeToggle.addEventListener('click', () => {
-            document.documentElement.classList.toggle('dark');
-        });
+clearSearchButton.addEventListener('click', () => {
+    searchInput.value = '';
+    resultsTitle.textContent = 'Trending in India';
+    fetchTrendingVideos();
+});
 
-        function isAudioPlaying() {
-            return !audioPlayer.paused && !audioPlayer.ended && audioPlayer.currentTime > 0;
+function displayResults(items) {
+    resultsContainer.innerHTML = '';
+    items.forEach(item => {
+        if (item.type === 'stream' || item.type === 'video') {
+            const videoElement = document.createElement('div');
+            videoElement.className = 'bg-white dark:bg-youtube-darkGray rounded-lg shadow-md overflow-hidden transition-transform duration-300 hover:scale-105 cursor-pointer';
+            videoElement.innerHTML = `
+                <img src="${item.thumbnail}" alt="${item.title}" class="w-full h-40 object-cover">
+                <div class="p-4">
+                    <h3 class="text-lg font-semibold mb-2 truncate">${item.title}</h3>
+                    <p class="text-sm text-gray-600 dark:text-gray-400 mb-1">${item.uploaderName}</p>
+                    <p class="text-xs text-gray-500 dark:text-gray-500">${item.views} views • ${item.uploadedDate || item.uploaded}</p>
+                </div>
+            `;
+            videoElement.addEventListener('click', () => playAudio(item.url, item.title));
+            resultsContainer.appendChild(videoElement);
         }
+    });
+}
 
-        // Load trending videos when the page loads
-        window.addEventListener('load', fetchTrendingVideos);
+async function playAudio(videoUrl, title) {
+    const videoId = videoUrl.split('v=')[1];
+    nowPlaying.textContent = `Loading audio for: ${title}`;
+    
+    try {
+        const audioUrl = await fetchAudioUrlWithRetry(videoId);
+        if (!audioUrl) throw new Error('Audio URL not found in the response');
+
+        audioPlayer.src = addCacheBuster(audioUrl);
+        await audioPlayer.play();
+        nowPlaying.textContent = `Now playing: ${title}`;
+    } catch (error) {
+        console.error('Error fetching or playing audio stream:', error);
+        nowPlaying.textContent = 'Error: Could not play audio. Click to retry.';
+        nowPlaying.onclick = () => playAudio(videoUrl, title);
+    }
+}
+
+async function fetchAudioUrlWithRetry(videoId, retries = 3) {
+    const apis = [
+        { name: 'Piped', fetch: fetchPipedApiUrl },
+        { name: 'Second Piped', fetch: fetchSecondPipedApiUrl },
+        { name: 'New API', fetch: fetchNewApiUrl },
+        { name: 'Cobalt', fetch: fetchCobaltApiUrl },
+        { name: 'YtdlOnline', fetch: fetchYtdlOnlineUrl }
+    ];
+
+    for (let i = 0; i < retries; i++) {
+        for (const api of apis) {
+            try {
+                const url = await api.fetch(videoId);
+                if (url) return url;
+            } catch (error) {
+                console.error(`Error fetching from ${api.name} API:`, error);
+            }
+        }
+        await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1))); // Exponential backoff
+    }
+    throw new Error('All APIs failed to provide a valid audio URL');
+}
+
+async function fetchPipedApiUrl(videoId) {
+    const response = await fetch(addCacheBuster(`https://api.allorigins.win/raw?url=https://pipedapi.reallyaweso.me/streams/${videoId}`), {
+        cache: 'no-store'
+    });
+    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+    const data = await response.json();
+    const audioStream = data.audioStreams.find(stream => stream.mimeType.startsWith('audio/'));
+    return audioStream ? audioStream.url : null;
+}
+
+async function fetchSecondPipedApiUrl(videoId) {
+    const response = await fetch(addCacheBuster(`https://api.allorigins.win/raw?url=https://pipedapi.adminforge.de/streams/${videoId}`), {
+        cache: 'no-store'
+    });
+    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+    const data = await response.json();
+    const audioStream = data.audioStreams.find(stream => stream.mimeType.startsWith('audio/'));
+    return audioStream ? audioStream.url : null;
+}
+
+async function fetchNewApiUrl(videoId) {
+    const response = await fetch(addCacheBuster(`https://api.allorigins.win/raw?url=https://kityune.imput.net/api/json?id=${videoId}`), {
+        cache: 'no-store'
+    });
+    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+    const data = await response.json();
+    return data.status === 'stream' && data.url ? data.url : null;
+}
+
+async function fetchCobaltApiUrl(videoId) {
+    const response = await fetch('https://api.cobalt.tools/api/json', {
+        method: 'POST',
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            url: `https://www.youtube.com/watch?v=${videoId}`,
+            aFormat: "opus",
+            isAudioOnly: true,
+            audioBitrate: 96000 
+        }),
+    });
+    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+    const data = await response.json();
+    return data.audio || data.url || null;
+}
+
+async function fetchYtdlOnlineUrl(videoId) {
+    const response = await fetch(addCacheBuster(`https://api.allorigins.win/raw?url=https://ytdlp.online/stream?command=https://www.youtube.com/watch?v=${videoId} --get-url`), {
+        timeout: 1000,
+        cache: 'no-store'
+    });
+    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+    const responseText = await response.text();
+    const urls = responseText.split('\n')
+        .filter(line => line.trim().startsWith('data:'))
+        .map(line => line.substring(5).trim())
+        .filter(url => url.startsWith('http'));
+    return urls.length >= 2 ? urls[1] : (urls.length === 1 ? urls[0] : null);
+}
+
+audioPlayer.addEventListener('error', (e) => {
+    console.error('Audio player error:', e);
+    nowPlaying.textContent = 'FAILED! Try another or click to retry.';
+    nowPlaying.onclick = () => {
+        audioPlayer.load();
+        audioPlayer.play().catch(playError => {
+            console.error('Retry failed:', playError);
+            nowPlaying.textContent = 'Error: Could not play audio. Please try another track.';
+        });
+    };
+});
+
+const darkModeToggle = document.getElementById('darkModeToggle');
+darkModeToggle.addEventListener('click', () => {
+    document.documentElement.classList.toggle('dark');
+});
+
+window.addEventListener('load', fetchTrendingVideos);
     </script>
 </body>
 </html>
