@@ -240,7 +240,7 @@ async function fetchAudioUrlWithRetry(videoId, retries = 3) {
 }
 
 async function fetchPipedApiUrl(videoId) {
-    const response = await fetch(addCacheBuster(`https://api.allorigins.win/raw?url=https://pipedapi.reallyaweso.me/streams/${videoId}`), {
+    const response = await fetch(addCacheBuster(`https://pipedapi.reallyaweso.me/streams/${videoId}`), {
         cache: 'no-store'
     });
     if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
@@ -250,7 +250,7 @@ async function fetchPipedApiUrl(videoId) {
 }
 
 async function fetchSecondPipedApiUrl(videoId) {
-    const response = await fetch(addCacheBuster(`https://api.allorigins.win/raw?url=https://pipedapi.adminforge.de/streams/${videoId}`), {
+    const response = await fetch(addCacheBuster(`https://pipedapi.adminforge.de/streams/${videoId}`), {
         cache: 'no-store'
     });
     if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
@@ -260,7 +260,7 @@ async function fetchSecondPipedApiUrl(videoId) {
 }
 
 async function fetchNewApiUrl(videoId) {
-    const response = await fetch(addCacheBuster(`https://api.allorigins.win/raw?url=https://kityune.imput.net/api/json?id=${videoId}`), {
+    const response = await fetch(addCacheBuster(`https://kityune.imput.net/api/json?id=${videoId}`), {
         cache: 'no-store'
     });
     if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
