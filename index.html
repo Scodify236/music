@@ -39,42 +39,88 @@
         ::-webkit-scrollbar-thumb:hover {
             background: #555;
         }
+
+        /* Custom search bar styles */
+        .search-form {
+            margin-bottom: 1.5rem;
+        }
+        .search-container {
+            display: flex;
+            align-items: center;
+            background-color: #282828;
+            border-radius: 9999px;
+            overflow: hidden;
+            width: 100%;
+        }
+        .search-input {
+            flex-grow: 1;
+            background-color: transparent;
+            color: white;
+            padding: 0.5rem 1rem;
+            border: none;
+            outline: none;
+            width: 100%;
+        }
+        .search-input::placeholder {
+            color: #a0a0a0;
+            width: 100%;
+        }
+        .search-button {
+            background: none;
+            border: none;
+            color: #a0a0a0;
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+        .search-button:hover {
+            color: white;
+        }
+        .search-divider {
+            color: #a0a0a0;
+            padding: 0 0.5rem;
+        }
     </style>
 </head>
 <body class="bg-white dark:bg-youtube-black text-gray-900 dark:text-gray-100 transition-colors duration-300">
     <header class="sticky top-0 z-50 bg-white dark:bg-youtube-black shadow-md">
-        <div class="container mx-auto px-4 py-3 flex items-center justify-between">
+        <div class="container mx-auto px-4 py-2 flex items-center justify-between">
             <div class="flex items-center">
-                <h1 class="text-xl sm:text-2xl font-bold mr-4">S-CLOUD</h1>
-                <span class="text-sm text-gray-500 dark:text-gray-400">Made with ❤️ made by Shashwat</span>
+                <h1 class="text-lg sm:text-xl font-bold mr-2">S-CLOUD</h1>
+                <span class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 truncate">Made with ❤️ by Shashwat</span>
             </div>
-            <button id="darkModeToggle" class="p-2 rounded-full bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors duration-300">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <button id="darkModeToggle" class="p-1 sm:p-2 rounded-full bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors duration-300">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
                 </svg>
             </button>
         </div>
     </header>
 
-    <main class="container mx-auto px-4 py-8 mb-24">
-        <form id="searchForm" class="mb-8">
-            <div class="flex flex-col sm:flex-row">
-                <input type="text" id="searchInput" placeholder="Search for music..." class="w-full sm:w-auto flex-grow p-3 rounded-l-full border-2 border-r-0 border-gray-300 dark:border-gray-700 bg-white dark:bg-youtube-darkGray focus:outline-none focus:ring-2 focus:ring-youtube-red dark:focus:ring-youtube-darkRed mb-2 sm:mb-0">
-                <button type="submit" id="searchButton" class="w-full sm:w-auto px-6 py-3 rounded-r-full bg-youtube-red hover:bg-youtube-darkRed text-white focus:outline-none focus:ring-2 focus:ring-youtube-darkRed focus:ring-opacity-50 transition-colors duration-300">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline-block" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <main class="container mx-auto px-4 py-4 sm:py-8 mb-24">
+        <form id="searchForm" class="search-form">
+            <div class="search-container">
+                <input type="text" id="searchInput" placeholder="daku" class="search-input">
+                <button type="button" id="clearSearch" class="search-button">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+                    </svg>
+                </button>
+                <span class="search-divider">|</span>
+                <button type="submit" id="searchButton" class="search-button">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                     </svg>
-                    <span class="ml-2 hidden sm:inline">Search</span>
                 </button>
             </div>
         </form>
-        <div id="results" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-8"></div>
+        <div id="results" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 mb-8"></div>
     </main>
 
     <footer class="fixed bottom-0 left-0 right-0 bg-white dark:bg-youtube-darkGray shadow-lg transition-all duration-300">
-        <div class="container mx-auto px-4 py-3">
-            <audio id="audioPlayer" controls class="w-full mb-2"></audio>
-            <div id="nowPlaying" class="text-center font-semibold text-sm"></div>
+        <div class="container mx-auto px-4 py-2 sm:py-3">
+            <audio id="audioPlayer" controls class="w-full mb-1 sm:mb-2"></audio>
+            <div id="nowPlaying" class="text-center font-semibold text-xs sm:text-sm truncate"></div>
         </div>
     </footer>
 
