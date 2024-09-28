@@ -279,9 +279,9 @@ async function fetchCobaltApiUrl(videoId) {
             },
             body: JSON.stringify({
                 url: `https://www.youtube.com/watch?v=${videoId}`,
-                aFormat: "mp3",
+                aFormat: "opus",  // Ensure audio is in opus format for streaming
                 isAudioOnly: true,
-                audioBitrate: 96000
+                audioBitrate: 96000 
             }),
         });
         if (!response.ok) {
