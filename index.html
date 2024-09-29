@@ -115,7 +115,7 @@
                 </button>
             </div>
         </form>
-        <h2 id="resultsTitle" class="text-2xl font-bold mb-4">Trending in India</h2>
+        <h2 id="resultsTitle" class="text-2xl font-bold mb-4">Trending</h2>
         <div id="results" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 mb-8"></div>
     </main>
 
@@ -278,9 +278,9 @@ async function fetchCobaltApiUrl(videoId) {
         },
         body: JSON.stringify({
             url: `https://www.youtube.com/watch?v=${videoId}`,
-            aFormat: "opus",
+            aFormat: "mp3",
             isAudioOnly: true,
-            audioBitrate: 64000 
+            audioBitrate: 8000 
         }),
     });
     if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
