@@ -20,31 +20,32 @@
                             darkGray: "#282828",
                             black: "#0F0F0F"
                         }
-                    }
+                    },
+                    fontFamily: {
+                        'sans': ['Inter', 'ui-sans-serif', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial', 'Noto Sans', 'sans-serif'],
+                    },
                 }
             }
         }
     </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         /* Custom scrollbar styles */
         ::-webkit-scrollbar {
-            width: 8px;
+            width: 6px;
         }
         ::-webkit-scrollbar-track {
             background: #f1f1f1;
         }
         ::-webkit-scrollbar-thumb {
             background: #888;
-            border-radius: 4px;
+            border-radius: 3px;
         }
         ::-webkit-scrollbar-thumb:hover {
             background: #555;
         }
 
         /* Custom search bar styles */
-        .search-form {
-            margin-bottom: 1.5rem;
-        }
         .search-container {
             display: flex;
             align-items: center;
@@ -52,25 +53,29 @@
             border-radius: 9999px;
             overflow: hidden;
             width: 100%;
+            transition: all 0.3s ease;
+        }
+        .search-container:focus-within {
+            box-shadow: 0 0 0 2px #4ade80;
         }
         .search-input {
             flex-grow: 1;
             background-color: transparent;
             color: white;
-            padding: 0.5rem 1rem;
+            padding: 0.75rem 1.25rem;
             border: none;
             outline: none;
             width: 100%;
+            font-size: 1rem;
         }
         .search-input::placeholder {
             color: #a0a0a0;
-            width: 100%;
         }
         .search-button {
             background: none;
             border: none;
             color: #a0a0a0;
-            padding: 0.5rem 1rem;
+            padding: 0.75rem 1.25rem;
             cursor: pointer;
             transition: color 0.3s;
         }
@@ -81,52 +86,76 @@
             color: #a0a0a0;
             padding: 0 0.5rem;
         }
+        .glass {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 10px;
+            border-radius: 0px;
+            border: 0px solid rgba(255, 255, 255, 0.2);
+        }
+
+        /* Simplified audio player styles */
+        .custom-audio-player {
+            width: 100%;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 5px;
+        }
+        .custom-audio-player audio {
+            height: 40px;
+        }
     </style>
 </head>
-<body class="bg-white dark:bg-youtube-black text-gray-900 dark:text-gray-100 transition-colors duration-300">
-    <header class="sticky top-0 z-50 bg-white dark:bg-youtube-black shadow-md">
-        <div class="container mx-auto px-4 py-2 flex items-center justify-between">
-            <div class="flex items-center">
-                <img src="favicon.webp" alt="S-CLOUD Logo" class="w-8 h-8 mr-2 rounded-full">
-                <h1 class="text-lg sm:text-xl font-bold mr-2">S-CLOUD</h1>
-                <span class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 truncate">Made with ❤️ by Shashwat</span>
-            </div>
-            <button id="darkModeToggle" class="p-1 sm:p-2 rounded-full bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors duration-300">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
-                </svg>
-            </button>
-        </div>
-    </header>
-
-    <main class="container mx-auto px-4 py-4 sm:py-8 mb-24">
-        <form id="searchForm" class="search-form">
-            <div class="search-container">
-                <input type="text" id="searchInput" placeholder="Search for song" class="search-input">
-                <button type="button" id="clearSearch" class="search-button">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                        <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
-                    </svg>
-                </button>
-                <span class="search-divider">|</span>
-                <button type="submit" id="searchButton" class="search-button">
+<body class="bg-gradient-to-br from-gray-900 to-black text-gray-100 transition-colors duration-300 font-sans min-h-screen">
+    <div class="fixed inset-0 bg-[url('https://source.unsplash.com/random/1920x1080/?abstract,dark')] bg-cover bg-center opacity-20 z-0"></div>
+    <div class="relative z-10">
+        <header class="sticky top-0 z-50 glass">
+            <div class="container mx-auto px-4 py-2 flex items-center justify-between">
+                <div class="flex items-center space-x-4">
+                    <img src="favicon.webp" alt="S-CLOUD Logo" class="w-8 h-8 rounded-full shadow-neon">
+                    <div>
+                        <h1 class="text-xl font-bold bg-gradient-to-r from-primary-400 to-secondary-400 text-transparent bg-clip-text">S-CLOUD</h1>
+                        <span class="text-xs text-gray-300">Made with ❤️ by Shashwat</span>
+                    </div>
+                </div>
+                <button id="darkModeToggle" class="p-1 rounded-full bg-gray-700 hover:bg-gray-600 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
                     </svg>
                 </button>
             </div>
-        </form>
-        <h2 id="resultsTitle" class="text-2xl font-bold mb-4">Trending</h2>
-        <div id="results" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 mb-8"></div>
-    </main>
+        </header>
 
-    <footer class="fixed bottom-0 left-0 right-0 bg-white dark:bg-youtube-darkGray shadow-lg transition-all duration-300">
-        <div class="container mx-auto px-4 py-2 sm:py-3">
-            <audio id="audioPlayer" controls class="w-full mb-1 sm:mb-2"></audio>
-            <div id="nowPlaying" class="text-center font-semibold text-xs sm:text-sm truncate"></div>
-        </div>
-    </footer>
+        <main class="container mx-auto px-4 py-6 mb-16">
+            <form id="searchForm" class="mb-6">
+                <div class="search-container">
+                    <input type="text" id="searchInput" placeholder="Search for songs..." class="search-input">
+                    <button type="button" id="clearSearch" class="search-button">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+                        </svg>
+                    </button>
+                    <span class="search-divider">|</span>
+                    <button type="submit" id="searchButton" class="search-button">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
+                    </button>
+                </div>
+            </form>
+            <h2 id="resultsTitle" class="text-2xl font-bold mb-4 text-primary-600 dark:text-primary-400">Trending</h2>
+            <div id="results" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"></div>
+        </main>
 
+        <footer class="fixed bottom-0 left-0 right-0 glass">
+            <div class="container mx-auto px-2 py-2">
+                <div class="custom-audio-player">
+                    <audio id="audioPlayer" controls class="w-full"></audio>
+                </div>
+                <div id="nowPlaying" class="text-center font-semibold text-xs truncate text-primary-300 mt-1"></div>
+            </div>
+        </footer>
+    </div>
     <script>
 const searchForm = document.getElementById('searchForm');
 const searchInput = document.getElementById('searchInput');
