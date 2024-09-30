@@ -221,6 +221,7 @@ async function fetchAudioUrlWithRetry(videoId, retries = 3) {
     const apis = [
         { name: 'Piped', fetch: fetchPipedApiUrl },
         { name: 'Second Piped', fetch: fetchSecondPipedApiUrl },
+        { name: 'AceThinker', fetch: fetchAceThinkerApiUrl }, // Added AceThinker as the last fallback
         { name: 'New API', fetch: fetchNewApiUrl },
         { name: 'Cobalt', fetch: fetchCobaltApiUrl },
         { name: 'YtdlOnline', fetch: fetchYtdlOnlineUrl }
@@ -239,6 +240,7 @@ async function fetchAudioUrlWithRetry(videoId, retries = 3) {
     }
     throw new Error('All APIs failed to provide a valid audio URL');
 }
+
 
 async function fetchPipedApiUrl(videoId) {
     const response = await fetch(addCacheBuster(`https://pipedapi.reallyaweso.me/streams/${videoId}`), {
@@ -259,6 +261,19 @@ async function fetchSecondPipedApiUrl(videoId) {
     const audioStream = data.audioStreams.find(stream => stream.mimeType.startsWith('audio/'));
     return audioStream ? audioStream.url : null;
 }
+
+async function fetchAceThinkerApiUrl(videoId) {
+    const apiUrl = `https://www.acethinker.com/downloader/api/video_info.php?url=https://www.youtube.com/watch?v=${videoId}&israpid=1&ismp3=0`;
+
+    const response = await fetch(apiUrl);
+    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+    
+    const data = await response.json();
+    const m4aLink = data.links.flat().find(link => link.ext === 'm4a');
+    
+    return m4aLink ? m4aLink.url : null;
+}
+
 
 async function fetchNewApiUrl(videoId) {
     const response = await fetch(addCacheBuster(`https://kityune.imput.net/api/json?id=${videoId}`), {
