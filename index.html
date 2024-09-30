@@ -242,7 +242,7 @@ async function playAudio(videoUrl, title) {
         nowPlaying.textContent = `Now playing: ${title}`;
     } catch (error) {
         console.error('Error fetching or playing audio stream:', error);
-        nowPlaying.textContent = 'Error: Could not play audio. Click to retry.';
+        nowPlaying.textContent = 'Error: Could not play audio. Click to retry or try other one.';
         nowPlaying.onclick = () => playAudio(videoUrl, title);
     }
 }
