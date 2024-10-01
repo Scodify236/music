@@ -232,17 +232,15 @@ function displayResults(items) {
 async function playAudio(videoUrl, title) {
     const videoId = videoUrl.split('v=')[1];
     nowPlaying.textContent = `Loading audio for: ${title}`;
-    
+
     try {
         const audioUrl = await fetchAudioUrlWithRetry(videoId);
-        if (!audioUrl) throw new Error('Audio URL not found in the response');
-
-        audioPlayer.src = addCacheBuster(audioUrl);
+        audioPlayer.src = audioUrl;
         await audioPlayer.play();
         nowPlaying.textContent = `Now playing: ${title}`;
     } catch (error) {
         console.error('Error fetching or playing audio stream:', error);
-        nowPlaying.textContent = 'Error: Could not play audio. Click to retry or try other one.';
+        nowPlaying.textContent = 'Error: Could not play audio. Click to retry.';
         nowPlaying.onclick = () => playAudio(videoUrl, title);
     }
 }
@@ -251,26 +249,32 @@ async function fetchAudioUrlWithRetry(videoId, retries = 3) {
     const apis = [
         { name: 'Piped', fetch: fetchPipedApiUrl },
         { name: 'Second Piped', fetch: fetchSecondPipedApiUrl },
-        { name: 'AceThinker', fetch: fetchAceThinkerApiUrl }, // Added AceThinker as the last fallback
+        { name: 'AceThinker', fetch: fetchAceThinkerApiUrl },
         { name: 'New API', fetch: fetchNewApiUrl },
         { name: 'Cobalt', fetch: fetchCobaltApiUrl },
         { name: 'YtdlOnline', fetch: fetchYtdlOnlineUrl }
     ];
 
-    for (let i = 0; i < retries; i++) {
+    for (let attempt = 0; attempt < retries; attempt++) {
         for (const api of apis) {
             try {
+                console.log(`Attempting to fetch from ${api.name} API...`);
                 const url = await api.fetch(videoId);
-                if (url) return url;
+                if (url) {
+                    console.log(`Success! ${api.name} API returned a valid URL: ${url}`);
+                    return url;
+                } else {
+                    console.log(`${api.name} API did not return a valid URL.`);
+                }
             } catch (error) {
                 console.error(`Error fetching from ${api.name} API:`, error);
             }
         }
-        await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1))); // Exponential backoff
+        console.log(`Retrying in ${attempt + 1} seconds...`);
+        await new Promise(resolve => setTimeout(resolve, 1000 * (attempt + 1)));
     }
     throw new Error('All APIs failed to provide a valid audio URL');
 }
-
 
 async function fetchPipedApiUrl(videoId) {
     const response = await fetch(addCacheBuster(`https://pipedapi.reallyaweso.me/streams/${videoId}`), {
@@ -293,17 +297,23 @@ async function fetchSecondPipedApiUrl(videoId) {
 }
 
 async function fetchAceThinkerApiUrl(videoId) {
-    const apiUrl = `https://www.acethinker.com/downloader/api/video_info.php?url=https://www.youtube.com/watch?v=${videoId}&israpid=1&ismp3=0`;
+    const encodedVideoId = encodeURIComponent(`https://www.youtube.com/watch?v=${videoId}`);
+    const apiUrl = `https://www.acethinker.com/downloader/api/video_info.php?url=${encodedVideoId}&israpid=1&ismp3=0`;
 
-    const response = await fetch(apiUrl);
-    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-    
-    const data = await response.json();
-    const m4aLink = data.links.flat().find(link => link.ext === 'm4a');
-    
-    return m4aLink ? m4aLink.url : null;
+    try {
+        const response = await fetch(addCacheBuster(apiUrl), {
+            cache: 'no-store'
+        });
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+        
+        const data = await response.json();
+        const webaLink = data.links.flat().find(link => link.ext === 'weba');
+        return webaLink ? webaLink.url : null;
+    } catch (error) {
+        console.error('Error fetching from AceThinker API:', error);
+        return null;
+    }
 }
-
 
 async function fetchNewApiUrl(videoId) {
     const response = await fetch(addCacheBuster(`https://kityune.imput.net/api/json?id=${videoId}`), {
@@ -315,7 +325,7 @@ async function fetchNewApiUrl(videoId) {
 }
 
 async function fetchCobaltApiUrl(videoId) {
-    const response = await fetch('https://api.cobalt.tools/api/json', {
+    const response = await fetch(addCacheBuster('https://api.cobalt.tools/api/json'), {
         method: 'POST',
         headers: {
             'Accept': 'application/json',
@@ -327,6 +337,7 @@ async function fetchCobaltApiUrl(videoId) {
             isAudioOnly: true,
             audioBitrate: 8000 
         }),
+        cache: 'no-store'
     });
     if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
     const data = await response.json();
@@ -349,13 +360,11 @@ async function fetchYtdlOnlineUrl(videoId) {
 
 audioPlayer.addEventListener('error', (e) => {
     console.error('Audio player error:', e);
-    nowPlaying.textContent = 'FAILED! Try another or click to retry.';
+    nowPlaying.textContent = 'Error: Could not play audio. Click to retry.';
     nowPlaying.onclick = () => {
-        audioPlayer.load();
-        audioPlayer.play().catch(playError => {
-            console.error('Retry failed:', playError);
-            nowPlaying.textContent = 'Error: Could not play audio. Please try another track.';
-        });
+        const currentSrc = audioPlayer.src;
+        const currentTitle = nowPlaying.textContent.replace('Now playing: ', '');
+        playAudio(currentSrc, currentTitle);
     };
 });
 
